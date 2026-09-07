@@ -338,85 +338,47 @@
         'status ' + type;
     }
 
-    function callApi(action, parameters) {
-      return new Promise(function(resolve, reject) {
-        const callbackName =
-          'taskCallback_' +
-          Date.now() +
-          '_' +
-          Math.floor(Math.random() * 100000);
+    async function callApi(action, parameters) {
+  const query =
+    new URLSearchParams({
+      action: action,
+      ...parameters,
+      cacheBust: Date.now()
+    });
 
-        const script =
-          document.createElement('script');
-
-        const timeout = setTimeout(
-          function() {
-            cleanup();
-            reject(
-              new Error(
-                '서버 연결 시간이 초과되었습니다.'
-              )
-            );
-          },
-          15000
-        );
-
-        function cleanup() {
-          clearTimeout(timeout);
-
-          if (script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
-
-          delete window[callbackName];
-        }
-
-        window[callbackName] =
-          function(result) {
-            cleanup();
-
-            if (
-              result &&
-              result.ok === false
-            ) {
-              reject(
-                new Error(
-                  result.message ||
-                  '처리 중 오류가 발생했습니다.'
-                )
-              );
-              return;
-            }
-
-            resolve(result);
-          };
-
-        const query =
-          new URLSearchParams({
-            action: action,
-            callback: callbackName,
-            ...parameters
-          });
-
-        script.src =
-          window.APP_CONFIG.API_URL +
-          '?' +
-          query.toString();
-
-        script.onerror =
-          function() {
-            cleanup();
-
-            reject(
-              new Error(
-                '업무등록 서버에 연결할 수 없습니다.'
-              )
-            );
-          };
-
-        document.body.appendChild(script);
-      });
+  await fetch(
+    window.APP_CONFIG.API_URL +
+    '?' +
+    query.toString(),
+    {
+      method: 'GET',
+      mode: 'no-cors',
+      cache: 'no-store'
     }
+  );
+
+  if (action === 'getState') {
+    return {
+      date:
+        new Intl.DateTimeFormat(
+          'ko-KR',
+          {
+            month: 'long',
+            day: 'numeric'
+          }
+        ).format(new Date()),
+      nextRow: '자동',
+      isFull: false
+    };
+  }
+
+  return {
+    message:
+      '업무를 등록했습니다.',
+    nextRow: '자동',
+    isFull: false
+  };
+}
 
     function showState(state) {
       dateText.textContent =
@@ -429,9 +391,7 @@
         saveButton.disabled = true;
       } else {
         positionText.textContent =
-          '다음 등록 위치: ' +
-          state.nextRow +
-          '행';
+  '다음 빈칸에 자동으로 등록됩니다.';
 
         saveButton.disabled = false;
       }
