@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <meta
+    name="theme-color"
+    content="#16794b">
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes">
+
+  <meta
+    name="apple-mobile-web-app-title"
+    content="업무등록">
+
+  <link
+    rel="manifest"
+    href="manifest.webmanifest">
+
+  <link
+    rel="icon"
+    href="icon.svg">
+
+  <link
+    rel="apple-touch-icon"
+    href="icon.svg">
+
+  <title>업무등록</title>
+
+  <style>
+    :root {
+      --green: #16794b;
+      --dark-green: #0f613b;
+      --light-green: #e9f5ed;
+      --background: #f4f8f5;
+      --line: #d8e5dc;
+      --text: #173528;
+      --gray: #678075;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Arial,
+        "Noto Sans KR",
+        sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(
+          160deg,
+          #eef7f1,
+          #fafcfb
+        );
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 28px 18px 35px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 5px 4px 24px;
+    }
+
+    .app-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      box-shadow:
+        0 8px 20px
+        rgba(22, 121, 75, 0.22);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .card {
+      padding: 23px 20px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: white;
+      box-shadow:
+        0 14px 38px
+        rgba(23, 53, 40, 0.08);
+    }
+
+    .date {
+      color: var(--green);
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      margin: 13px 0 10px;
+      padding: 17px;
+      resize: none;
+      border: 2px solid var(--line);
+      border-radius: 17px;
+      outline: none;
+      color: var(--text);
+      background: #fbfdfc;
+      font-family: inherit;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow:
+        0 0 0 4px
+        rgba(22, 121, 75, 0.09);
+    }
+
+    .position {
+      min-height: 22px;
+      margin: 0 2px 15px;
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 10px;
+    }
+
+    button {
+      min-height: 58px;
+      border: 0;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #voiceButton {
+      color: var(--dark-green);
+      background: var(--light-green);
+    }
+
+    #saveButton {
+      color: white;
+      background: var(--green);
+      box-shadow:
+        0 8px 18px
+        rgba(22, 121, 75, 0.2);
+    }
+
+    #installButton {
+      display: none;
+      width: 100%;
+      margin-top: 11px;
+      color: var(--dark-green);
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .status {
+      display: none;
+      margin-top: 15px;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .success {
+      display: block;
+      color: #0d6039;
+      background: #e9f7ef;
+    }
+
+    .error {
+      display: block;
+      color: #982d2d;
+      background: #fff0f0;
+    }
+
+    .listening {
+      animation:
+        pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      to {
+        transform: scale(1.025);
+        background: #cfead9;
+      }
+    }
+
+    .guide {
+      margin: 19px 6px 0;
+      color: var(--gray);
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <header class="header">
+      <img
+        class="app-icon"
+        src="icon.svg"
+        alt="업무등록">
+
+      <div>
+        <h1>업무등록</h1>
+
+        <p class="subtitle">
+          오늘의 업무를 간편하게 기록하세요
+        </p>
+      </div>
+    </header>
+
+    <section class="card">
+
+      <div
+        id="date"
+        class="date">
+        오늘 날짜 확인 중…
+      </div>
+
+      <textarea
+        id="task"
+        maxlength="1000"
+        placeholder="업무 내용을 입력하거나 음성으로 말씀해 주세요."></textarea>
+
+      <div
+        id="position"
+        class="position">
+        등록 위치를 확인하고 있습니다.
+      </div>
+
+      <div class="buttons">
+
+        <button
+          id="voiceButton"
+          type="button">
+          🎤 음성입력
+        </button>
+
+        <button
+          id="saveButton"
+          type="button">
+          업무 등록
+        </button>
+
+      </div>
+
+      <button
+        id="installButton"
+        type="button">
+        앱 설치
+      </button>
+
+      <div
+        id="status"
+        class="status">
+      </div>
+
+    </section>
+
+    <div class="guide">
+      안드로이드: Chrome 메뉴 → 앱 설치
+      <br>
+      아이폰: Safari 공유 버튼 → 홈 화면에 추가
+    </div>
+
+  </main>
+
+  <script src="config.js"></script>
+
+  <script>
+    const taskInput =
+      document.getElementById('task');
+
+    const saveButton =
+      document.getElementById('saveButton');
+
+    const voiceButton =
+      document.getElementById('voiceButton');
+
+    const installButton =
+      document.getElementById('installButton');
+
+    const dateText =
+      document.getElementById('date');
+
+    const positionText =
+      document.getElementById('position');
+
+    const statusBox =
+      document.getElementById('status');
+
+    let installPrompt = null;
+
+    function showStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.className =
+        'status ' + type;
+    }
+
+    function callApi(action, parameters) {
+      return new Promise(function(resolve, reject) {
+        const callbackName =
+          'taskCallback_' +
+          Date.now() +
+          '_' +
+          Math.floor(Math.random() * 100000);
+
+        const script =
+          document.createElement('script');
+
+        const timeout = setTimeout(
+          function() {
+            cleanup();
+            reject(
+              new Error(
+                '서버 연결 시간이 초과되었습니다.'
+              )
+            );
+          },
+          15000
+        );
+
+        function cleanup() {
+          clearTimeout(timeout);
+
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+
+          delete window[callbackName];
+        }
+
+        window[callbackName] =
+          function(result) {
+            cleanup();
+
+            if (
+              result &&
+              result.ok === false
+            ) {
+              reject(
+                new Error(
+                  result.message ||
+                  '처리 중 오류가 발생했습니다.'
+                )
+              );
+              return;
+            }
+
+            resolve(result);
+          };
+
+        const query =
+          new URLSearchParams({
+            action: action,
+            callback: callbackName,
+            ...parameters
+          });
+
+        script.src =
+          window.APP_CONFIG.API_URL +
+          '?' +
+          query.toString();
+
+        script.onerror =
+          function() {
+            cleanup();
+
+            reject(
+              new Error(
+                '업무등록 서버에 연결할 수 없습니다.'
+              )
+            );
+          };
+
+        document.body.appendChild(script);
+      });
+    }
+
+    function showState(state) {
+      dateText.textContent =
+        state.date + ' 업무';
+
+      if (state.isFull) {
+        positionText.textContent =
+          '오늘의 업무 입력란이 모두 찼습니다.';
+
+        saveButton.disabled = true;
+      } else {
+        positionText.textContent =
+          '다음 등록 위치: ' +
+          state.nextRow +
+          '행';
+
+        saveButton.disabled = false;
+      }
+    }
+
+    async function loadState() {
+      try {
+        const state =
+          await callApi(
+            'getState',
+            {}
+          );
+
+        showState(state);
+      } catch (error) {
+        showStatus(
+          error.message,
+          'error'
+        );
+      }
+    }
+
+    saveButton.addEventListener(
+      'click',
+      async function() {
+        const text =
+          taskInput.value.trim();
+
+        if (!text) {
+          showStatus(
+            '업무 내용을 입력해 주세요.',
+            'error'
+          );
+
+          taskInput.focus();
+          return;
+        }
+
+        saveButton.disabled = true;
+        saveButton.textContent =
+          '등록 중…';
+
+        try {
+          const result =
+            await callApi(
+              'addTask',
+              {
+                text: text
+              }
+            );
+
+          taskInput.value = '';
+
+          showStatus(
+            result.message,
+            'success'
+          );
+
+          showState({
+            date:
+              dateText.textContent
+                .replace(' 업무', ''),
+            nextRow:
+              result.nextRow,
+            isFull:
+              result.isFull
+          });
+
+          taskInput.focus();
+        } catch (error) {
+          showStatus(
+            error.message,
+            'error'
+          );
+
+          saveButton.disabled = false;
+        }
+
+        saveButton.textContent =
+          '업무 등록';
+      }
+    );
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      voiceButton.disabled = true;
+
+      voiceButton.textContent =
+        '음성입력 미지원';
+    } else {
+      const recognition =
+        new SpeechRecognition();
+
+      recognition.lang = 'ko-KR';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      recognition.onstart =
+        function() {
+          voiceButton.classList.add(
+            'listening'
+          );
+
+          voiceButton.textContent =
+            '듣는 중…';
+        };
+
+      recognition.onresult =
+        function(event) {
+          const spokenText =
+            event.results[0][0]
+              .transcript
+              .trim();
+
+          if (taskInput.value.trim()) {
+            taskInput.value =
+              taskInput.value.trim() +
+              ' ' +
+              spokenText;
+          } else {
+            taskInput.value =
+              spokenText;
+          }
+        };
+
+      recognition.onerror =
+        function(event) {
+          let message =
+            '음성 인식 오류: ' +
+            event.error;
+
+          if (
+            event.error ===
+            'not-allowed'
+          ) {
+            message =
+              '마이크 사용을 허용해 주세요.';
+          }
+
+          showStatus(
+            message,
+            'error'
+          );
+        };
+
+      recognition.onend =
+        function() {
+          voiceButton.classList.remove(
+            'listening'
+          );
+
+          voiceButton.textContent =
+            '🎤 음성입력';
+        };
+
+      voiceButton.addEventListener(
+        'click',
+        function() {
+          try {
+            recognition.start();
+          } catch (error) {
+          }
+        }
+      );
+    }
+
+    window.addEventListener(
+      'beforeinstallprompt',
+      function(event) {
+        event.preventDefault();
+        installPrompt = event;
+
+        installButton.style.display =
+          'block';
+      }
+    );
+
+    installButton.addEventListener(
+      'click',
+      async function() {
+        if (!installPrompt) {
+          return;
+        }
+
+        installPrompt.prompt();
+
+        await installPrompt.userChoice;
+
+        installPrompt = null;
+
+        installButton.style.display =
+          'none';
+      }
+    );
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener(
+        'load',
+        function() {
+          navigator.serviceWorker
+            .register('sw.js');
+        }
+      );
+    }
+
+    loadState();
+  </script>
+</body>
+</html>
