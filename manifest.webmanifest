@@ -1,0 +1,19 @@
+{
+  "name": "업무등록",
+  "short_name": "업무등록",
+  "description": "음성 또는 문자로 개인 업무를 등록합니다.",
+  "lang": "ko-KR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f7f4",
+  "theme_color": "#16794b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
